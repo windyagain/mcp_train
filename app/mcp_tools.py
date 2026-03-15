@@ -1,3 +1,4 @@
+import asyncio
 import json
 from typing import Any, Dict, List, Tuple
 
@@ -79,19 +80,26 @@ async def call_tool(
     - 不再回退到本地 Python 实现，失败就是失败
     """
 
-    # 1) 如果是内置工具名称，转发到名为 "internal" 的 MCP server
+    # 1) 内置工具直接本地调用（避免 MCP stdio 进程阻塞）
     internal_builtin_names = {"get_weather", "http_get_text", "browser_screenshot"}
     if name in internal_builtin_names:
-        result = await session.execute(
-            select(McpServer).where(
-                McpServer.enabled.is_(True), McpServer.name == "internal"
+        if name == "get_weather":
+            return True, await tool_get_weather(
+                city=arguments.get("city", "Beijing"),
+                date=arguments.get("date"),
             )
-        )
-        internal_server = result.scalar_one_or_none()
-        if internal_server:
-            ok, text = await mcp_call_tool_remote(internal_server, name, arguments)
-            return ok, text
-        return False, f'Internal MCP server "internal" not configured or disabled'
+        if name == "http_get_text":
+            return True, await tool_http_get_text(
+                url=arguments.get("url"),
+                max_chars=int(arguments.get("max_chars", 2000)),
+            )
+        if name == "browser_screenshot":
+            return True, await tool_browser_screenshot(
+                url=arguments.get("url"),
+                width=int(arguments.get("width", 1280)),
+                height=int(arguments.get("height", 720)),
+            )
+        return False, "Unknown internal tool"
 
     # 2) 外部 MCP server 工具，命名约定："{server_name}/{tool_name}"
     if "/" in name:
@@ -103,8 +111,16 @@ async def call_tool(
         )
         server = result.scalar_one_or_none()
         if server:
-            ok, text = await mcp_call_tool_remote(server, tool_name, arguments)
-            return ok, text
+            try:
+                ok, text = await asyncio.wait_for(
+                    mcp_call_tool_remote(server, tool_name, arguments),
+                    timeout=30,
+                )
+                return ok, text
+            except Exception as e:
+                if isinstance(e, asyncio.TimeoutError):
+                    return False, f"MCP error ({server_name}): TimeoutError after 30s"
+                return False, f"MCP error ({server_name}): {type(e).__name__}: {e}"
 
     # 3) 兜底：未知工具
     return False, f"Unknown tool: {name}"
@@ -140,5 +156,3 @@ async def _tool_browser_screenshot(arguments: Dict[str, Any]) -> str:
     width = int(arguments.get("width", 1280))
     height = int(arguments.get("height", 720))
     return await tool_browser_screenshot(url=url, width=width, height=height)
-
-

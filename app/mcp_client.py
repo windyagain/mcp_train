@@ -9,8 +9,21 @@ from mcp.client.stdio import stdio_client
 from .models import McpServer
 
 
-async def mcp_list_tools(server: McpServer) -> List[Dict[str, Any]]:
+def _resolve_server_command(server: McpServer) -> tuple[str, List[str]]:
+    """
+    Resolve command/args for MCP server.
+    For the built-in "internal" server, always use the current venv's Python
+    and module invocation to avoid dependency/import issues.
+    """
+    if server.name == "internal":
+        return sys.executable, ["-u", "-m", "app.internal_mcp_server"]
+
     args: List[str] = json.loads(server.args_json or "[]")
+    return server.command, args
+
+
+async def mcp_list_tools(server: McpServer) -> List[Dict[str, Any]]:
+    command, args = _resolve_server_command(server)
 
     # 关键：获取项目根目录（mcp_train 目录）
     project_root = server.cwd or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,7 +33,7 @@ async def mcp_list_tools(server: McpServer) -> List[Dict[str, Any]]:
     env["PYTHONPATH"] = project_root
 
     params = StdioServerParameters(
-        command=server.command,
+        command=command,
         args=args,
         env=env,
     )
@@ -55,14 +68,14 @@ async def mcp_list_tools(server: McpServer) -> List[Dict[str, Any]]:
 async def mcp_call_tool(
         server: McpServer, name: str, arguments: Dict[str, Any]
 ) -> Tuple[bool, str]:
-    args: List[str] = json.loads(server.args_json or "[]")
+    command, args = _resolve_server_command(server)
 
     project_root = server.cwd or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     env = os.environ.copy()
     env["PYTHONPATH"] = project_root
 
     params = StdioServerParameters(
-        command=server.command,
+        command=command,
         args=args,
         env=env,
     )

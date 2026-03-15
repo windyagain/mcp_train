@@ -38,7 +38,7 @@ def test():
     )
 
     try:
-        # 发送请求
+        # 发送请求（initialize）
         proc.stdin.write(header + body)
         proc.stdin.flush()
 
@@ -80,6 +80,45 @@ def test():
         # 读取 body
         body_data = proc.stdout.read(length)
         print(f"Body: {body_data.decode()}")
+
+        # -------- tools/call 测试 --------
+        req2 = {
+            "jsonrpc": "2.0",
+            "id": 2,
+            "method": "tools/call",
+            "params": {"name": "get_weather", "arguments": {"city": "Beijing"}}
+        }
+        body2 = json.dumps(req2).encode()
+        header2 = f"Content-Length: {len(body2)}\r\n\r\n".encode()
+
+        print("\nSending tools/call get_weather...")
+        proc.stdin.write(header2 + body2)
+        proc.stdin.flush()
+
+        ready2, _, _ = select.select([proc.stdout], [], [], 8.0)
+        if not ready2:
+            print("TIMEOUT! No tools/call response in 8 seconds")
+            print("Stderr:", proc.stderr.read().decode())
+            return
+
+        line2 = proc.stdout.readline()
+        print(f"Raw response line: {line2!r}")
+        if not line2:
+            print("Empty response for tools/call!")
+            print("Stderr:", proc.stderr.read().decode())
+            return
+
+        decoded2 = line2.decode().strip()
+        if ":" not in decoded2:
+            print(f"Invalid header: {decoded2!r}")
+            return
+
+        length2 = int(decoded2.split(":")[1].strip())
+        print(f"Content-Length: {length2}")
+        empty2 = proc.stdout.readline()
+        print(f"Empty line: {empty2!r}")
+        body2_data = proc.stdout.read(length2)
+        print(f"Body: {body2_data.decode()}")
 
     finally:
         proc.kill()

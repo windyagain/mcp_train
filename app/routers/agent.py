@@ -1,4 +1,6 @@
 import json
+import logging
+import time
 from typing import AsyncGenerator, List, Optional, Any
 
 from fastapi import APIRouter, Depends
@@ -13,6 +15,7 @@ from ..schemas import AgentRequest, AgentResponse, AgentStep
 
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 def _extract_json_from_text(text: str) -> Optional[Any]:
@@ -277,8 +280,18 @@ async def agent_chat_stream(
                     break
 
                 if step.type == "action" and step.tool_name:
-                    ok, obs = await call_tool(
-                        session, step.tool_name, step.tool_input or {}
+                    t0 = time.perf_counter()
+                    print(f"[tool_call start] tool={step.tool_name} input={step.tool_input}")
+                    try:
+                        ok, obs = await call_tool(
+                            session, step.tool_name, step.tool_input or {}
+                        )
+                    except Exception as e:  # noqa: BLE001
+                        ok = False
+                        obs = f"tool call exception: {e}"
+                        logger.exception("tool_call exception tool=%s", step.tool_name)
+                    print(
+                        f"[tool_call done] tool={step.tool_name} ok={ok} dur_ms={(time.perf_counter()-t0)*1000:.1f}"
                     )
                     obs_step = AgentStep(
                         type="observation",
@@ -334,5 +347,3 @@ async def agent_chat_stream(
         event_generator(),
         media_type="text/event-stream",
     )
-
-

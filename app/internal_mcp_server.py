@@ -6,11 +6,20 @@ from typing import Any, Dict
 
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
-from .internal_tools_impl import (
-    tool_browser_screenshot,
-    tool_get_weather,
-    tool_http_get_text,
-)
+
+# Support running as a script: `python app/internal_mcp_server.py`
+try:
+    from .internal_tools_impl import (
+        tool_browser_screenshot,
+        tool_get_weather,
+        tool_http_get_text,
+    )
+except ImportError:
+    from app.internal_tools_impl import (
+        tool_browser_screenshot,
+        tool_get_weather,
+        tool_http_get_text,
+    )
 
 
 TOOLS: Dict[str, Dict[str, Any]] = {
@@ -57,9 +66,33 @@ TOOLS: Dict[str, Dict[str, Any]] = {
 }
 
 
-async def handle_request(payload: Dict[str, Any]) -> Dict[str, Any]:
+async def handle_request(payload: Dict[str, Any]) -> Dict[str, Any] | None:
     method = payload.get("method")
     req_id = payload.get("id")
+
+    print(f"[internal_mcp_server] recv method={method} id={req_id}", file=sys.stderr)
+
+    # Notifications (no id) should not receive responses.
+    if req_id is None:
+        return None
+
+    if method == "initialize":
+        return {
+            "jsonrpc": "2.0",
+            "id": req_id,
+            "result": {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {},
+                "serverInfo": {"name": "internal", "version": "0.1"},
+            },
+        }
+
+    if method == "ping":
+        return {
+            "jsonrpc": "2.0",
+            "id": req_id,
+            "result": {},
+        }
 
     if method == "tools/list":
         return {
@@ -162,6 +195,8 @@ async def main() -> None:
         payload = json.loads(body.decode("utf-8"))
 
         resp = await handle_request(payload)
+        if resp is None:
+            continue
         resp_bytes = json.dumps(resp, ensure_ascii=False).encode("utf-8")
         header = f"Content-Length: {len(resp_bytes)}\r\n\r\n".encode("utf-8")
         writer.write(header + resp_bytes)
@@ -170,7 +205,3 @@ async def main() -> None:
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-
-
