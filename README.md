@@ -24,13 +24,13 @@
 
 ```mermaid
 flowchart LR
-  UI[React UI (Vite)] -->|HTTP/SSE| API[FastAPI]
-  API -->|ReAct loop| LLM[LLM API (SiliconFlow)]
+  UI["React UI (Vite)"] -->|"HTTP/SSE"| API["FastAPI"]
+  API -->|"ReAct loop"| LLM["LLM API (SiliconFlow)"]
   API -->|tools/list| DB[(SQLite)]
-  API -->|tools/call| BUILTIN[Built-in tools]
-  API -->|tools/call| MCP[MCP stdio servers]
-  MCP -->|stdio JSON-RPC| INTERNAL[internal_mcp_server.py]
-  BUILTIN -->|network| EXT[wttr.in / HTTP targets]
+  API -->|tools/call| BUILTIN["Built-in tools"]
+  API -->|tools/call| MCP["MCP stdio servers"]
+  MCP -->|"stdio JSON-RPC"| INTERNAL["internal_mcp_server.py"]
+  BUILTIN -->|network| EXT["wttr.in / HTTP targets"]
 ```
 
 ## 项目结构
