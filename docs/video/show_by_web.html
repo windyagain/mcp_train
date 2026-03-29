@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP ReAct Demo - 项目能力说明</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .section-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .mermaid {
+            background: transparent !important;
+        }
+
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .expandable-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+
+        .expandable-content.active {
+            max-height: 2000px;
+        }
+
+        .feature-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .code-block {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .timeline-dot::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .glow {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.3) 0%, transparent 70%);
+            filter: blur(40px);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen overflow-x-hidden">
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center px-4 overflow-hidden">
+        <div class="glow top-0 left-1/4"></div>
+        <div class="glow bottom-0 right-1/4"></div>
+
+        <div class="relative z-10 text-center max-w-5xl mx-auto">
+            <div class="mb-6 inline-block">
+                <span class="section-badge">Agent Engineering Demo</span>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                <span class="gradient-text">MCP ReAct Demo</span>
+                <br>
+                <span class="text-white">项目能力说明</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-400 mb-12 max-w-3xl mx-auto leading-relaxed">
+                可运行的 Agent 工程样例，串联前端交互、ReAct 推理、工具调度与 MCP 协议的全链路可视化展示
+            </p>
+
+            <div class="flex flex-wrap justify-center gap-4 text-sm text-slate-400">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <span>FastAPI 后端</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    <span>React 前端</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span>ReAct 推理</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"></path></svg>
+                    <span>MCP 协议</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+        </div>
+    </section>
+
+    <!-- Architecture Overview -->
+    <section class="py-20 px-4 md:px-8 max-w-7xl mx-auto">
+        <div class="mb-12">
+            <span class="section-badge mb-4 inline-block">01</span>
+            <h2 class="text-4xl font-bold text-white mb-4">整体架构</h2>
+            <p class="text-slate-400 text-lg">可运行的 Agent 工程样例核心链路</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-8 mb-12 hover-lift">
+            <div class="mermaid">
+flowchart LR
+  U[用户] --> FE[React 前端]
+  FE -->|HTTP / SSE| API[FastAPI 后端]
+  API -->|读取工具配置| DB[(SQLite)]
+  API -->|ReAct Prompt + 历史消息| LLM[LLM API]
+  API -->|调用内置工具| BI[Built-in Tools]
+  API -->|tools/list & tools/call| MCP[MCP Client]
+  MCP -->|stdio JSON-RPC| S1[internal MCP server]
+  MCP -->|stdio JSON-RPC| S2[external MCP servers]
+  BI --> NET[互联网资源]
+  S1 --> NET
+  S2 --> NET
+
+  style U fill:#1e293b,stroke:#667eea,stroke-width:2px,color:#fff
+  style FE fill:#1e293b,stroke:#667eea,stroke-width:2px,color:#fff
+  style API fill:#1e293b,stroke:#764ba2,stroke-width:3px,color:#fff
+  style LLM fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#fff
+  style MCP fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#fff
+  style DB fill:#1e293b,stroke:#64748b,stroke-width:2px,color:#fff
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="glass-card rounded-xl p-6 hover-lift cursor-pointer" onclick="toggleExpand('arch-details')">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-2xl">🏗️</div>
+                    <svg class="w-5 h-5 text-slate-400 transform transition-transform" id="arch-details-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+                <h3 class="text-xl font-semibold text-white mb-2">分层架构视角</h3>
+                <p class="text-slate-400 text-sm mb-4">展示层、应用层、领域与集成层、数据层的详细关系</p>
+
+                <div id="arch-details" class="expandable-content">
+                    <div class="mermaid mt-4">
+flowchart TB
+  subgraph Presentation[展示层]
+    FE2[frontend/src/App.tsx]
+  end
+
+  subgraph Application[应用层]
+    A1[routers/agent.py]
+    A2[routers/tools.py]
+    A3[routers/mcp_servers.py]
+  end
+
+  subgraph Domain[领域与集成层]
+    D1[mcp_tools.py]
+    D2[mcp_client.py]
+    D3[llm_client.py]
+    D4[internal_tools_impl.py]
+    D5[internal_mcp_server.py]
+  end
+
+  subgraph Data[数据层]
+    M[models.py]
+    DB2[(mcp_demo.sqlite3)]
+  end
+
+  FE2 --> A1
+  FE2 --> A2
+  FE2 --> A3
+  A1 --> D1
+  A1 --> D3
+  A2 --> M
+  A3 --> D2
+  D1 --> D2
+  D1 --> D4
+  D2 --> D5
+  M --> DB2
+
+  style Presentation fill:#1e293b,stroke:#667eea,stroke-width:2px,color:#fff
+  style Application fill:#1e293b,stroke:#764ba2,stroke-width:2px,color:#fff
+  style Domain fill:#1e293b,stroke:#10b981,stroke-width:2px,color:#fff
+  style Data fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#fff
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-xl p-6 hover-lift">
+                <div class="flex items-start gap-4 mb-4">
+                    <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-2xl">🔄</div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-white mb-2">数据流说明</h3>
+                        <p class="text-slate-400 text-sm">端到端的请求处理流程</p>
+                    </div>
+                </div>
+                <ul class="space-y-3 text-sm text-slate-300">
+                    <li class="flex items-start gap-2">
+                        <span class="text-purple-400 mt-1">●</span>
+                        <span>前端通过 HTTP/SSE 与 FastAPI 后端通信</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-purple-400 mt-1">●</span>
+                        <span>后端读取 SQLite 中的工具配置</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-purple-400 mt-1">●</span>
+                        <span>ReAct Prompt 结合历史消息调用 LLM API</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="text-purple-400 mt-1">●</span>
+                        <span>支持内置工具与外部 MCP Server 统一调度</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Concepts -->
+    <section class="py-20 px-4 md:px-8 bg-slate-900/50">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-12">
+                <span class="section-badge mb-4 inline-block">02</span>
+                <h2 class="text-4xl font-bold text-white mb-4">核心概念与横向扩展</h2>
+                <p class="text-slate-400 text-lg">四大关键模块的技术解析</p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- ReAct Pattern -->
+                <div class="glass-card rounded-2xl p-8 hover-lift border-l-4 border-purple-500">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-2xl shadow-lg shadow-purple-500/30">🧠</div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-white">ReAct 推理模式</h3>
+                            <p class="text-purple-400 text-sm">ReAct + Plan-and-Execute</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 mb-6">
+                        <div class="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+                            <h4 class="text-white font-semibold mb-2 flex items-center gap-2">
+                                <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+                                单步 ReAct
+                            </h4>
+                            <p class="text-slate-400 text-sm">每轮只返回一个步骤，强依赖上一轮 observation，适合高不确定任务（网页抓取、复杂检索）</p>
+                        </div>
+
+                        <div class="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+                            <h4 class="text-white font-semibold mb-2 flex items-center gap-2">
+                                <span class="w-2 h-2 bg-blue-400 rounded-full"></span>
+                                多步计划模式
+                            </h4>
+                            <p class="text-slate-400 text-sm">一次返回 JSON 数组，后端按序执行，适合结构化任务（"先读文件再汇总"）</p>
+                        </div>
+                    </div>
+
+                    <div class="code-block p-4 text-xs overflow-x-auto">
+                        <pre class="text-slate-300">{
+  "thought": "分析当前状态...",
+  "action": "调用工具...",
+  "observation": "工具返回结果...",
+  "final": "最终答案（可选）"
+}</pre>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                        <p class="text-purple-300 text-sm">💡 <span class="font-semibold">扩展建议：</span>动态模式切换策略，根据任务类型或历史失败率选择模式</p>
+                    </div>
+                </div>
+
+                <!-- MCP Protocol -->
+                <div class="glass-card rounded-2xl p-8 hover-lift border-l-4 border-green-500">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-2xl shadow-lg shadow-green-500/30">🔌</div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-white">MCP 协议机制</h3>
+                            <p class="text-green-400 text-sm">stdio + JSON-RPC</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center gap-3 p-3 bg-slate-800/30 rounded-lg">
+                            <span class="text-green-400 font-mono text-sm">1.</span>
+                            <span class="text-slate-300 text-sm">启动子进程（command + args）</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-slate-800/30 rounded-lg">
+                            <span class="text-green-400 font-mono text-sm">2.</span>
+                            <span class="text-slate-300 text-sm">发送 Content-Length 头的 JSON-RPC</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-slate-800/30 rounded-lg">
+                            <span class="text-green-400 font-mono text-sm">3.</span>
+                            <span class="text-slate-300 text-sm">调用 tools/list 获取工具定义</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-slate-800/30 rounded-lg">
+                            <span class="text-green-400 font-mono text-sm">4.</span>
+                            <span class="text-slate-300 text-sm">调用 tools/call 执行工具</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <h4 class="text-white font-semibold text-sm mb-2">传输协议对比</h4>
+                        <div class="grid grid-cols-3 gap-2 text-xs">
+                            <div class="bg-slate-800 p-2 rounded text-center border border-green-500/30">
+                                <div class="text-green-400 font-bold mb-1">stdio</div>
+                                <div class="text-slate-400">当前实现</div>
+                                <div class="text-slate-500 mt-1">本地开发简单</div>
+                            </div>
+                            <div class="bg-slate-800 p-2 rounded text-center border border-slate-700">
+                                <div class="text-blue-400 font-bold mb-1">SSE</div>
+                                <div class="text-slate-400">跨机器部署</div>
+                                <div class="text-slate-500 mt-1">云原生支持</div>
+                            </div>
+                            <div class="bg-slate-800 p-2 rounded text-center border border-slate-700">
+                                <div class="text-purple-400 font-bold mb-1">WebSocket</div>
+                                <div class="text-slate-400">双向通信</div>
+                                <div class="text-slate-500 mt-1">实时交互</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tool System -->
+                <div class="glass-card rounded-2xl p-8 hover-lift border-l-4 border-blue-500">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center text-2xl shadow-lg shadow-blue-500/30">🛠️</div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-white">工具系统</h3>
+                            <p class="text-blue-400 text-sm">Schema 驱动 + 统一调度</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-semibold">JSON Schema 描述</h4>
+                                <p class="text-slate-400 text-sm">工具参数使用 JSON Schema 描述并存储在 DB，模型可基于 schema 做更稳定的参数构造</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-semibold">统一调度</h4>
+                                <p class="text-slate-400 text-sm">Agent 不关心工具来源（内置 or 外部 MCP），统一由 mcp_tools.py 分发</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-semibold">工具治理</h4>
+                                <p class="text-slate-400 text-sm">开关、审计、限流可以在调度层集中处理，新工具接入成本低</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SSE Streaming -->
+                <div class="glass-card rounded-2xl p-8 hover-lift border-l-4 border-orange-500">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-2xl shadow-lg shadow-orange-500/30">📡</div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-white">SSE 流式返回</h3>
+                            <p class="text-orange-400 text-sm">可观测性的基础</p>
+                        </div>
+                    </div>
+
+                    <p class="text-slate-300 mb-6 text-sm leading-relaxed">
+                        <code class="bg-slate-800 px-2 py-1 rounded text-orange-400">/api/agent/chat-stream</code>
+                        通过 SSE 实时推送事件，让前端可以"逐步可视化 Agent 思考轨迹"
+                    </p>
+
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
+                                <span class="text-slate-300 font-mono text-sm">meta</span>
+                            </div>
+                            <span class="text-slate-500 text-xs">会话元数据</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                                <span class="text-slate-300 font-mono text-sm">step</span>
+                            </div>
+                            <span class="text-slate-500 text-xs">thought/action/observation/final</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></span>
+                                <span class="text-slate-300 font-mono text-sm">done</span>
+                            </div>
+                            <span class="text-slate-500 text-xs">最终答案</span>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                        <p class="text-orange-300 text-sm">📊 <span class="font-semibold">可扩展：</span>step 级耗时、token 用量、失败重试次数上报，支持审计日志与回放</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Capabilities Timeline -->
+    <section class="py-20 px-4 md:px-8 max-w-7xl mx-auto">
+        <div class="mb-12">
+            <span class="section-badge mb-4 inline-block">03</span>
+            <h2 class="text-4xl font-bold text-white mb-4">已实现能力</h2>
+            <p class="text-slate-400 text-lg">由浅入深的五大能力层级</p>
+        </div>
+
+        <div class="relative">
+            <div class="absolute left-4 md:left-1/2 transform md:-translate-x-1/2 h-full w-0.5 bg-gradient-to-b from-purple-500 to-pink-500"></div>
+
+            <div class="space-y-12">
+                <!-- Level 1 -->
+                <div class="relative flex flex-col md:flex-row items-center md:justify-between gap-8">
+                    <div class="hidden md:block w-5/12 text-right">
+                        <h3 class="text-2xl font-bold text-white mb-2">基础能力</h3>
+                        <p class="text-slate-400">可运行的全栈闭环</p>
+                    </div>
+
+                    <div class="timeline-dot z-10"></div>
+
+                    <div class="md:w-5/12 w-full glass-card rounded-xl p-6 ml-8 md:ml-0">
+                        <div class="md:hidden mb-4">
+                            <h3 class="text-xl font-bold text-white">基础能力</h3>
+                            <p class="text-slate-400 text-sm">可运行的全栈闭环</p>
+                        </div>
+                        <ul class="space-y-2 text-slate-300 text-sm">
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                FastAPI 后端 + React 前端完整联调
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                同步接口 <code class="bg-slate-800 px-1 rounded">/api/agent/chat</code>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                流式接口 <code class="bg-slate-800 px-1 rounded">/api/agent/chat-stream</code>
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                会话消息持久化到 SQLite
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Level 2 -->
+                <div class="relative flex flex-col md:flex-row-reverse items-center md:justify-between gap-8">
+                    <div class="hidden md:block w-5/12 text-left">
+                        <h3 class="text-2xl font-bold text-white mb-2">工具能力</h3>
+                        <p class="text-slate-400">内置工具可直接使用</p>
+                    </div>
+
+                    <div class="timeline-dot z-10"></div>
+
+                    <div class="md:w-5/12 w-full glass-card rounded-xl p-6 ml-8 md:ml-0">
+                        <div class="md:hidden mb-4">
+                            <h3 class="text-xl font-bold text-white">工具能力</h3>
+                            <p class="text-slate-400 text-sm">内置工具可直接使用</p>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg">
+                                <span class="text-2xl">🌤️</span>
+                                <div>
+                                    <div class="text-white font-medium text-sm">get_weather</div>
+                                    <div class="text-slate-500 text-xs">基于 wttr.in 查询天气</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg">
+                                <span class="text-2xl">🌐</span>
+                                <div>
+                                    <div class="text-white font-medium text-sm">http_get_text</div>
+                                    <div class="text-slate-500 text-xs">抓取 URL 文本并截断</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-slate-800/50 rounded-lg">
+                                <span class="text-2xl">📸</span>
+                                <div>
+                                    <div class="text-white font-medium text-sm">browser_screenshot</div>
+                                    <div class="text-slate-500 text-xs">Playwright 截图并输出静态资源 URL</div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mt-3 text-xs text-slate-500">覆盖"查询 + 抓取 + 页面观察"三类常见 Agent 动作</p>
+                    </div>
+                </div>
+
+                <!-- Level 3 -->
+                <div class="relative flex flex-col md:flex-row items-center md:justify-between gap-8">
+                    <div class="hidden md:block w-5/12 text-right">
+                        <h3 class="text-2xl font-bold text-white mb-2">MCP 能力</h3>
+                        <p class="text-slate-400">外部工具生态接入</p>
+                    </div>
+
+                    <div class="timeline-dot z-10"></div>
+
+                    <div class="md:w-5/12 w-full glass-card rounded-xl p-6 ml-8 md:ml-0">
+                        <div class="md:hidden mb-4">
+                            <h3 class="text-xl font-bold text-white">MCP 能力</h3>
+                            <p class="text-slate-400 text-sm">外部工具生态接入</p>
+                        </div>
+                        <ul class="space-y-2 text-slate-300 text-sm">
+                            <li class="flex items-start gap-2">
+                                <span class="text-green-400 mt-1">✓</span>
+                                <span>配置 MCP Server（command / args / cwd / enabled）</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-green-400 mt-1">✓</span>
+                                <span>刷新 <code class="bg-slate-800 px-1 rounded">tools/list</code> 并缓存工具清单</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-green-400 mt-1">✓</span>
+                                <span>按 <code class="bg-slate-800 px-1 rounded">server_name/tool_name</code> 调用远端工具</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-green-400 mt-1">✓</span>
+                                <span>内部与外部 MCP Server 统一调用抽象</span>
+                            </li>
+                        </ul>
+                        <div class="mt-4 p-2 bg-green-500/10 rounded border border-green-500/20">
+                            <p class="text-green-400 text-xs">具备"从单体工具到工具生态"的扩展基础</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Level 4 -->
+                <div class="relative flex flex-col md:flex-row-reverse items-center md:justify-between gap-8">
+                    <div class="hidden md:block w-5/12 text-left">
+                        <h3 class="text-2xl font-bold text-white mb-2">推理能力</h3>
+                        <p class="text-slate-400">结构化 ReAct 执行</p>
+                    </div>
+
+                    <div class="timeline-dot z-10"></div>
+
+                    <div class="md:w-5/12 w-full glass-card rounded-xl p-6 ml-8 md:ml-0">
+                        <div class="md:hidden mb-4">
+                            <h3 class="text-xl font-bold text-white">推理能力</h3>
+                            <p class="text-slate-400 text-sm">结构化 ReAct 执行</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="bg-slate-800/50 p-3 rounded text-center">
+                                <div class="text-purple-400 font-bold text-lg">JSON</div>
+                                <div class="text-slate-500 text-xs">约束输出格式</div>
+                            </div>
+                            <div class="bg-slate-800/50 p-3 rounded text-center">
+                                <div class="text-purple-400 font-bold text-lg">容错</div>
+                                <div class="text-slate-500 text-xs">代码块剥离/片段提取</div>
+                            </div>
+                            <div class="bg-slate-800/50 p-3 rounded text-center">
+                                <div class="text-purple-400 font-bold text-lg">回灌</div>
+                                <div class="text-slate-500 text-xs">自动生成 observation</div>
+                            </div>
+                            <div class="bg-slate-800/50 p-3 rounded text-center">
+                                <div class="text-purple-400 font-bold text-lg">多步</div>
+                                <div class="text-slate-500 text-xs">计划数组顺序执行</div>
+                            </div>
+                        </div>
+                        <p class="text-slate-400 text-xs">可控、可追踪、可调试的 Agent 执行内核</p>
+                    </div>
+                </div>
+
+                <!-- Level 5 -->
+                <div class="relative flex flex-col md:flex-row items-center md:justify-between gap-8">
+                    <div class="hidden md:block w-5/12 text-right">
+                        <h3 class="text-2xl font-bold text-white mb-2">工程能力</h3>
+                        <p class="text-slate-400">配置化与可运营性</p>
+                    </div>
+
+                    <div class="timeline-dot z-10"></div>
+
+                    <div class="md:w-5/12 w-full glass-card rounded-xl p-6 ml-8 md:ml-0">
+                        <div class="md:hidden mb-4">
+                            <h3 class="text-xl font-bold text-white">工程能力</h3>
+                            <p class="text-slate-400 text-sm">配置化与可运营性</p>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded bg-purple-500/20 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                </div>
+                                <div class="text-slate-300 text-sm">工具配置 API：增删查工具定义</div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded bg-purple-500/20 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path></svg>
+                                </div>
+                                <div class="text-slate-300 text-sm">MCP Server 配置 API：增删查与刷新</div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded bg-purple-500/20 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <div class="text-slate-300 text-sm">前端可视化配置页与执行页</div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded bg-purple-500/20 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <div class="text-slate-300 text-sm">静态文件托管用于截图结果直出</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-700">
+                            <p class="text-purple-400 text-sm font-semibold">不仅"能跑"，还"可演示、可配置、可迭代"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Future Roadmap -->
+    <section class="py-20 px-4 md:px-8 bg-slate-900/50">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-12 text-center">
+                <span class="section-badge mb-4 inline-block">04</span>
+                <h2 class="text-4xl font-bold text-white mb-4">后续演进建议</h2>
+                <p class="text-slate-400 text-lg">优先推荐的四个演进方向</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="glass-card rounded-xl p-6 hover-lift group">
+                    <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">1</div>
+                    <h3 class="text-lg font-bold text-white mb-2">多传输协议 MCP</h3>
+                    <p class="text-slate-400 text-sm mb-3">stdio + http/sse 统一适配</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">stdio</span>
+                        <span class="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">SSE</span>
+                        <span class="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">HTTP</span>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-6 hover-lift group">
+                    <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">2</div>
+                    <h3 class="text-lg font-bold text-white mb-2">工具执行治理</h3>
+                    <p class="text-slate-400 text-sm mb-3">超时、重试、并发隔离、权限</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">熔断</span>
+                        <span class="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">限流</span>
+                        <span class="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">权限</span>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-6 hover-lift group">
+                    <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">3</div>
+                    <h3 class="text-lg font-bold text-white mb-2">观测体系</h3>
+                    <p class="text-slate-400 text-sm mb-3">指标、日志、链路追踪</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded">Metrics</span>
+                        <span class="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded">Logging</span>
+                        <span class="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded">Tracing</span>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-xl p-6 hover-lift group">
+                    <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">4</div>
+                    <h3 class="text-lg font-bold text-white mb-2">记忆增强</h3>
+                    <p class="text-slate-400 text-sm mb-3">多轮上下文压缩、长期记忆索引</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 bg-pink-500/20 text-pink-400 text-xs rounded">压缩</span>
+                        <span class="px-2 py-1 bg-pink-500/20 text-pink-400 text-xs rounded">索引</span>
+                        <span class="px-2 py-1 bg-pink-500/20 text-pink-400 text-xs rounded">召回</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-4 text-center text-slate-500 text-sm border-t border-slate-800">
+        <p>MCP ReAct Demo 项目能力说明 | 基于提供的项目文档生成</p>
+    </footer>
+
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#1e293b',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#667eea',
+                lineColor: '#64748b',
+                secondaryColor: '#334155',
+                tertiaryColor: '#1e293b',
+                fontFamily: 'Inter, Noto Sans SC, sans-serif'
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+
+        // Toggle expandable content
+        function toggleExpand(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById(id + '-icon');
+
+            if (content.classList.contains('active')) {
+                content.classList.remove('active');
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                content.classList.add('active');
+                icon.style.transform = 'rotate(180deg)';
+                // Re-render mermaid if needed
+                mermaid.init(undefined, content.querySelectorAll('.mermaid'));
+            }
+        }
+
+        // Smooth scroll for any anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Add intersection observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all cards
+        document.querySelectorAll('.glass-card').forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
