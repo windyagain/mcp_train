@@ -1,4 +1,4 @@
-# MCP ReAct Demo 项目能力说明
+# Agent +MCP Demo 项目总结
 
 ## 1. 项目整体架构
 
@@ -9,64 +9,21 @@
 - 工具既可以是本地内置实现，也可以是外部 MCP Server
 - 推理过程通过 SSE 实时回传到前端
 
-```mermaid
-flowchart LR
-  U[用户] --> FE[React 前端]
-  FE -->|HTTP / SSE| API[FastAPI 后端]
-  API -->|读取工具配置| DB[(SQLite)]
-  API -->|ReAct Prompt + 历史消息| LLM[LLM API]
-  API -->|调用内置工具| BI[Built-in Tools]
-  API -->|tools/list & tools/call| MCP[MCP Client]
-  MCP -->|stdio JSON-RPC| S1[internal MCP server]
-  MCP -->|stdio JSON-RPC| S2[external MCP servers]
-  BI --> NET[互联网资源]
-  S1 --> NET
-  S2 --> NET
-```
+
+
+![image-20260329163440971](/Users/pxy/PycharmProjects/mcp_train/docs/video/images/image-20260329163440971.png)
 
 ### 1.1 分层视角
 
-```mermaid
-flowchart TB
-  subgraph Presentation[展示层]
-    FE2[frontend/src/App.tsx]
-  end
-
-  subgraph Application[应用层]
-    A1[routers/agent.py]
-    A2[routers/tools.py]
-    A3[routers/mcp_servers.py]
-  end
-
-  subgraph Domain[领域与集成层]
-    D1[mcp_tools.py]
-    D2[mcp_client.py]
-    D3[llm_client.py]
-    D4[internal_tools_impl.py]
-    D5[internal_mcp_server.py]
-  end
-
-  subgraph Data[数据层]
-    M[models.py]
-    DB2[(mcp_demo.sqlite3)]
-  end
-
-  FE2 --> A1
-  FE2 --> A2
-  FE2 --> A3
-  A1 --> D1
-  A1 --> D3
-  A2 --> M
-  A3 --> D2
-  D1 --> D2
-  D1 --> D4
-  D2 --> D5
-  M --> DB2
-```
-
----
+![image-20260329163520769](/Users/pxy/PycharmProjects/mcp_train/docs/video/images/image-20260329163520769.png)
 
 ## 2. 各部分概念与横向扩展
+
+
+
+![](/Users/pxy/PycharmProjects/mcp_train/docs/video/images/image-20260329163747466.png)
+
+
 
 ## 2.1 Agent 推理模式：ReAct 与 Plan-and-Execute
 
@@ -89,14 +46,13 @@ flowchart TB
 
 ## 2.2 MCP 协议与 stdio 连接机制
 
-项目当前以 **stdio + JSON-RPC** 方式连接 MCP Server，流程是：
+这一节只讲概念层：
 
-1. 启动子进程（`command + args`）
-2. 发送带 `Content-Length` 头的 JSON-RPC 请求
-3. 调用 `tools/list` 获取工具定义
-4. 调用 `tools/call` 执行工具并返回文本内容
+- MCP 在本项目里承载“工具发现（tools/list）+ 工具执行（tools/call）”
+- 当前默认传输方式是 **stdio + JSON-RPC**
+- 与此同时，MCP 生态也支持向 SSE/Streamable HTTP、WebSocket 等方式扩展
 
-这正是 `app/mcp_client.py` 与 `app/internal_mcp_server.py` 的工作核心。
+本项目的“具体实现细节”（internal 怎么启动、external 怎么接、`npx server-filesystem` 怎么配）统一放到 **3.3** 章节。
 
 横向扩展（连接方式）：
 
@@ -122,6 +78,17 @@ flowchart TB
 - **Schema 驱动**：工具参数使用 JSON Schema 描述并存储在 DB
 - **统一调度**：Agent 不关心工具来源（内置 or 外部 MCP），统一由 `mcp_tools.py` 分发
 
+在这个项目里，“注册”分两个层面：
+
+1. **工具元数据注册（Tool 表）**
+   - 接口：`POST /api/tools`
+   - 存的是工具 schema 和描述，供 Agent 理解“可调用什么”
+2. **MCP Server 注册（McpServer 表）**
+   - 接口：`POST /api/mcp-servers`
+   - 存的是 server 启动方式（command/args/cwd），供后端知道“去哪里调用”
+
+两者结合后，系统才能同时具备“会选工具”与“能真正执行工具”。
+
 价值：
 
 - 新工具接入成本低
@@ -143,7 +110,9 @@ flowchart TB
 - step 级耗时、token 用量、失败重试次数上报
 - 将 step 事件写入审计日志，支持回放
 
----
+![image-20260329163809406](/Users/pxy/PycharmProjects/mcp_train/docs/video/images/image-20260329163809406.png)
+
+
 
 ## 3. 已实现能力（由浅入深）
 
@@ -154,7 +123,7 @@ flowchart TB
 - 支持流式接口 `/api/agent/chat-stream`
 - 会话消息持久化到 SQLite
 
-## 3.2 工具能力：内置工具可直接使用
+## 3.2 工具能力：内置工具与注册机制
 
 当前内置工具：
 
@@ -164,12 +133,98 @@ flowchart TB
 
 这保证了“查询 + 抓取 + 页面观察”三类常见 Agent 动作都可用。
 
-## 3.3 MCP 能力：外部工具生态接入
+在这个项目里，“工具注册”分两个层面：
 
-- 支持配置 MCP Server（command / args / cwd / enabled）
-- 支持刷新 `tools/list` 并缓存工具清单
-- 支持按 `server_name/tool_name` 调用远端工具
-- 内部 MCP Server 与外部 MCP Server 采用统一调用抽象
+1. **工具元数据注册（Tool 表）**
+   - 接口：`POST /api/tools`
+   - 存的是工具 schema 和描述，供 Agent 理解“可调用什么”
+2. **MCP Server 注册（McpServer 表）**
+   - 接口：`POST /api/mcp-servers`
+   - 存的是 server 启动方式（command/args/cwd），供后端知道“去哪里调用”
+
+两者结合后，系统才能同时具备“会选工具”与“能真正执行工具”。
+
+## 3.3 MCP 能力：internal / external 接入实现细节
+
+项目里的关键机制是：**后端进程统一扮演 MCP Client，internal 与 external 都按“子进程 stdio”接入**。
+
+### 3.3.1 本系统中的三类工具来源
+
+1. **内置 Python 工具（直连）**
+   - 代码位置：`app/internal_tools_impl.py`
+   - 在 `mcp_tools.call_tool` 中可直接本地调用
+
+2. **内部 MCP Server（internal）**
+   - 代码位置：`app/internal_mcp_server.py`
+   - 配置方式：`command=python, args=["-m","app.internal_mcp_server"]`
+
+3. **外部 MCP Server（如 server-filesystem）**
+   - 配置方式：`command=npx, args=["-y","@modelcontextprotocol/server-filesystem","/"]`
+   - 工具名形式：`server-name/tool-name`，如 `server-filesystem/read_text_file`
+
+### 3.3.2 internal MCP server 的启动方式
+
+`python -m app.internal_mcp_server` 在本项目中是“由后端按需拉起”的子进程，不要求你手工常驻启动：
+
+- 先在 `mcp_servers` 表配置 internal 记录
+- 后端执行 `tools/list` / `tools/call` 时临时启动进程
+- 请求响应完成后进程退出
+
+### 3.3.3 外部 server-filesystem 接入示例（npx）
+
+```json
+POST /api/mcp-servers/
+{
+  "name": "server-filesystem",
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-filesystem", "/"],
+  "cwd": "/Users/pxy/PycharmProjects/mcp_train",
+  "enabled": true
+}
+```
+
+```text
+POST /api/mcp-servers/{id}/refresh-tools
+```
+
+刷新后可用工具会缓存到 `last_tools_json`，常见名称示例：
+
+- `server-filesystem/read_text_file`
+- `server-filesystem/list_directory`
+- `server-filesystem/write_file`
+
+### 3.3.4 Agent 到 MCP 的调用链
+
+```mermaid
+sequenceDiagram
+  participant FE as Frontend
+  participant API as FastAPI(agent.py)
+  participant MT as mcp_tools.py
+  participant MC as mcp_client.py
+  participant PROC as MCP Server Process
+
+  FE->>API: POST /api/agent/chat-stream
+  API->>MT: list_tools()
+  MT->>MC: mcp_list_tools(server)
+  MC->>PROC: spawn(command,args) + tools/list
+  PROC-->>MC: tools definitions
+  MC-->>MT: tool list
+  MT-->>API: merged tools
+  API->>MT: call_tool(server-filesystem/read_text_file,...)
+  MT->>MC: mcp_call_tool(server, tool, args)
+  MC->>PROC: spawn(command,args) + tools/call
+  PROC-->>MC: tool result
+  MC-->>MT: observation text
+  MT-->>API: observation
+  API-->>FE: SSE step(observation/final)
+```
+
+### 3.3.5 排障最小检查清单
+
+- internal 不通：确认 `command` 指向当前虚拟环境的 `python`，`args` 为 `["-m","app.internal_mcp_server"]`
+- external 不通：确认本机可执行 `npx`，且 npm 能拉取包
+- tools/list 为空：先执行 refresh-tools，再检查 `last_tools_json`
+- 工具名找不到：确认调用全名 `server-name/tool-name`
 
 这意味着项目已经具备“从单体工具到工具生态”的扩展基础。
 
@@ -208,3 +263,5 @@ flowchart TB
 2. 工具执行治理（超时、重试、并发隔离、权限）
 3. 观测体系（指标、日志、链路追踪）
 4. 记忆增强（多轮上下文压缩、长期记忆索引）
+
+![image-20260329192323774](/Users/pxy/PycharmProjects/mcp_train/docs/video/images/image-20260329192323774.png)

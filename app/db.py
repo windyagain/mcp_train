@@ -18,8 +18,9 @@ AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=F
 
 async def init_db() -> None:
     from sqlalchemy import select
-    from .models import Tool  # noqa: F401
+    from .models import Tool, McpServer  # noqa: F401
     import json
+    import sys
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -112,11 +113,25 @@ async def init_db() -> None:
                 )
             )
 
+        # 默认写入 internal MCP server（统一走 MCP 调用链）
+        result = await session.execute(
+            select(McpServer).where(McpServer.name == "internal")
+        )
+        if not result.scalar_one_or_none():
+            session.add(
+                McpServer(
+                    name="internal",
+                    command=sys.executable,
+                    args_json=json.dumps(["-m", "app.internal_mcp_server"], ensure_ascii=False),
+                    cwd=str(Path(__file__).resolve().parent.parent),
+                    enabled=True,
+                )
+            )
+
         await session.commit()
 
 
 async def get_session() -> AsyncSession:
     async with AsyncSessionLocal() as session:
         yield session
-
 

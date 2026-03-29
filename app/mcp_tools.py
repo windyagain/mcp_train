@@ -5,11 +5,6 @@ from typing import Any, Dict, List, Tuple
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .internal_tools_impl import (
-    tool_browser_screenshot,
-    tool_get_weather,
-    tool_http_get_text,
-)
 from .mcp_client import mcp_call_tool as mcp_call_tool_remote, mcp_list_tools
 from .models import McpServer, Tool
 
@@ -22,14 +17,19 @@ async def list_tools(session: AsyncSession) -> List[Dict[str, Any]]:
     - 外部 MCP server 暴露的工具（通过 tools/list 动态获取）
     """
     tools: List[Dict[str, Any]] = []
+    seen_names = set()
 
-    # 1) 内置工具
+    # 1) Tool 表内置工具统一映射到 internal 前缀，保证可路由到 MCP server
     result = await session.execute(select(Tool).where(Tool.implementation_type == "builtin"))
     for tool in result.scalars():
         schema = json.loads(tool.schema_json)
+        full_name = tool.name if "/" in tool.name else f"internal/{tool.name}"
+        if full_name in seen_names:
+            continue
+        seen_names.add(full_name)
         tools.append(
             {
-                "name": tool.name,
+                "name": full_name,
                 "description": tool.description,
                 "input_schema": schema,
             }
@@ -51,8 +51,10 @@ async def list_tools(session: AsyncSession) -> List[Dict[str, Any]]:
                 dirty = True
 
             for t in tool_list:
-                # 给 name 加上 server 前缀，避免和本地工具冲突，例如 "time/getTime"
                 full_name = f"{server.name}/{t.get('name')}"
+                if full_name in seen_names:
+                    continue
+                seen_names.add(full_name)
                 tools.append(
                     {
                         "name": full_name,
@@ -80,79 +82,32 @@ async def call_tool(
     - 不再回退到本地 Python 实现，失败就是失败
     """
 
-    # 1) 内置工具直接本地调用（避免 MCP stdio 进程阻塞）
-    internal_builtin_names = {"get_weather", "http_get_text", "browser_screenshot"}
-    if name in internal_builtin_names:
-        if name == "get_weather":
-            return True, await tool_get_weather(
-                city=arguments.get("city", "Beijing"),
-                date=arguments.get("date"),
-            )
-        if name == "http_get_text":
-            return True, await tool_http_get_text(
-                url=arguments.get("url"),
-                max_chars=int(arguments.get("max_chars", 2000)),
-            )
-        if name == "browser_screenshot":
-            return True, await tool_browser_screenshot(
-                url=arguments.get("url"),
-                width=int(arguments.get("width", 1280)),
-                height=int(arguments.get("height", 720)),
-            )
-        return False, "Unknown internal tool"
-
-    # 2) 外部 MCP server 工具，命名约定："{server_name}/{tool_name}"
-    if "/" in name:
-        server_name, tool_name = name.split("/", 1)
-        result = await session.execute(
-            select(McpServer).where(
-                McpServer.enabled.is_(True), McpServer.name == server_name
-            )
+    # 1) 统一按 MCP server/tool_name 形式路由
+    if "/" not in name:
+        return (
+            False,
+            f"Unknown tool: {name}. Expected MCP tool name format: <server_name>/<tool_name>",
         )
-        server = result.scalar_one_or_none()
-        if server:
-            try:
-                ok, text = await asyncio.wait_for(
-                    mcp_call_tool_remote(server, tool_name, arguments),
-                    timeout=30,
-                )
-                return ok, text
-            except Exception as e:
-                if isinstance(e, asyncio.TimeoutError):
-                    return False, f"MCP error ({server_name}): TimeoutError after 30s"
-                return False, f"MCP error ({server_name}): {type(e).__name__}: {e}"
+
+    # 2) MCP server 工具，命名约定："{server_name}/{tool_name}"
+    server_name, tool_name = name.split("/", 1)
+    result = await session.execute(
+        select(McpServer).where(
+            McpServer.enabled.is_(True), McpServer.name == server_name
+        )
+    )
+    server = result.scalar_one_or_none()
+    if server:
+        try:
+            ok, text = await asyncio.wait_for(
+                mcp_call_tool_remote(server, tool_name, arguments),
+                timeout=30,
+            )
+            return ok, text
+        except Exception as e:
+            if isinstance(e, asyncio.TimeoutError):
+                return False, f"MCP error ({server_name}): TimeoutError after 30s"
+            return False, f"MCP error ({server_name}): {type(e).__name__}: {e}"
 
     # 3) 兜底：未知工具
     return False, f"Unknown tool: {name}"
-
-
-async def _tool_get_weather(arguments: Dict[str, Any]) -> str:
-    """
-    真实调用 wttr.in 的天气工具，等价于：
-    curl "wttr.in/London?format=3"
-    """
-    city = arguments.get("city", "London")
-    date = arguments.get("date")
-    return await tool_get_weather(city=city, date=date)
-
-
-async def _tool_http_get_text(arguments: Dict[str, Any]) -> str:
-    """
-    通用 HTTP GET 文本工具：拉取一个 URL 的文本内容（前几 KB）
-    """
-    url = arguments.get("url")
-    max_chars = int(arguments.get("max_chars", 2000))
-    return await tool_http_get_text(url=url, max_chars=max_chars)
-
-
-async def _tool_browser_screenshot(arguments: Dict[str, Any]) -> str:
-    """
-    真实浏览器截图工具：
-    - 使用 Playwright 启动 headless Chromium 打开页面
-    - 截图为 PNG，保存到本地 static/screenshots 目录
-    - 返回可访问的 URL（例如 /static/screenshots/xxx.png）
-    """
-    url = arguments.get("url")
-    width = int(arguments.get("width", 1280))
-    height = int(arguments.get("height", 720))
-    return await tool_browser_screenshot(url=url, width=width, height=height)

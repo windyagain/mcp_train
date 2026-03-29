@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Optional
 
 import httpx
-from playwright.async_api import async_playwright
 
 async def tool_get_weather(city: str, date: Optional[str] = None) -> str:
     """
@@ -45,6 +44,11 @@ async def tool_browser_screenshot(
     if not url:
         return "缺少必填参数 url"
 
+    try:
+        from playwright.async_api import async_playwright
+    except Exception:
+        return "browser_screenshot 依赖 Playwright，请先安装 playwright 并执行 python -m playwright install"
+
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         try:
@@ -65,7 +69,6 @@ async def tool_browser_screenshot(
     file_path.write_bytes(png_bytes)
 
     return f"/static/screenshots/{filename}"
-
 
 
 
